@@ -36,6 +36,25 @@ local M = {
     "akinsho/bufferline.nvim",
     version = "*",
     dependencies = "nvim-tree/nvim-web-devicons",
+    event = "VeryLazy",
+    opts = {
+      options = {
+        always_show_bufferline = false,
+        buffer_close_icon = "󰅖",
+        modified_icon = "● ",
+        close_icon = " ",
+        left_trunc_marker = " ",
+        right_trunc_marker = " ",
+        offsets = {
+          {
+            filetype = "neo-tree",
+            text = "File Explorer",
+            text_align = "center",
+            separator = true,
+          },
+        },
+      },
+    },
   },
 
   {
@@ -89,8 +108,94 @@ local M = {
     "nvimdev/dashboard-nvim",
     event = "VimEnter",
     config = function()
+      local logo = [[
+ ▄▄▄▄▄▄▄ ▄▄▄     ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄    ▄▄   ▄▄ ▄▄▄ ▄▄   ▄▄ 
+█       █   █   █       █       █       █  █  █ █  █   █  █▄█  █
+█  ▄▄▄▄▄█   █   █    ▄▄▄█    ▄▄▄█    ▄  █  █  █▄█  █   █       █
+█ █▄▄▄▄▄█   █   █   █▄▄▄█   █▄▄▄█   █▄█ █  █       █   █       █
+█▄▄▄▄▄  █   █▄▄▄█    ▄▄▄█    ▄▄▄█    ▄▄▄█  █       █   █       █
+ ▄▄▄▄▄█ █       █   █▄▄▄█   █▄▄▄█   █       █     ██   █ ██▄██ █
+█▄▄▄▄▄▄▄█▄▄▄▄▄▄▄█▄▄▄▄▄▄▄█▄▄▄▄▄▄▄█▄▄▄█        █▄▄▄█ █▄▄▄█▄█   █▄█
+      ]]
+
+      logo = string.rep("\n", 15) .. logo .. "\n\n"
+
+      local conf = vim.fn.stdpath("config")
+
+      local shortcut = {
+        {
+          action = "ene | startinsert",
+          desc = " New file",
+          icon = " ",
+          key = "n",
+        },
+
+        {
+          action = "Telescope find_files",
+          desc = " Find file",
+          icon = " ",
+          key = "f",
+        },
+
+        {
+          action = "Telescope oldfiles",
+          desc = " Recent file",
+          icon = " ",
+          key = "r",
+        },
+
+        {
+          action = "Telescope live_grep",
+          desc = " Find Text",
+          icon = " ",
+          key = "g",
+        },
+
+        {
+          action = "lua require('persistence').load()",
+          desc = " Restore Session",
+          icon = " ",
+          key = "s",
+        },
+
+        {
+          action = "Neotree float " .. conf,
+          desc = " Configuration",
+          icon = " ",
+          key = "c",
+        },
+
+        {
+          action = "qa",
+          desc = " Quit",
+          icon = " ",
+          key = "q",
+        },
+      }
+      for _, button in ipairs(shortcut) do
+        button.desc = button.desc .. string.rep(" ", 40 - #button.desc)
+        button.key_format = "  %s"
+      end
+
+      local bottom = function()
+        local status = require("lazy").stats()
+        local time = (math.floor(status.startuptime * 100 + 0.5) / 100)
+        local loaded = status.loaded
+        local count = status.count
+        return {
+          " ",
+          "🚀 " .. "Startuptime: " .. time .. " ms",
+          "✨ " .. "Plugins: " .. loaded .. "/" .. count .. " loaded",
+        }
+      end
+
       require("dashboard").setup({
-        -- config
+        theme = "doom",
+        config = {
+          header = vim.split(logo, "\n"),
+          center = shortcut,
+          footer = bottom,
+        },
       })
     end,
     dependencies = { { "nvim-tree/nvim-web-devicons" } },

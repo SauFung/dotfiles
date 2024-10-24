@@ -1,18 +1,17 @@
 if vim.fn.has("wsl") then
   vim.g.clipboard = {
-    name = 'win32yank-wsl',
+    name = "win32yank-wsl",
     copy = {
-      ['+'] = WIN32YANK .. ' -i --crlf',
-      ['*'] = WIN32YANK .. ' -i --crlf',
+      ["+"] = WIN32YANK .. " -i --crlf",
+      ["*"] = WIN32YANK .. " -i --crlf",
     },
     paste = {
-      ['+'] = WIN32YANK .. ' -o --lf',
-      ['*'] = WIN32YANK .. ' -o --lf',
+      ["+"] = WIN32YANK .. " -o --lf",
+      ["*"] = WIN32YANK .. " -o --lf",
     },
     cache_enable = false,
   }
 end
-
 
 local o = vim.opt
 
@@ -29,7 +28,7 @@ o.cursorline = true
 
 o.list = true
 o.listchars = {
-    trail = "_",
+  trail = "_",
 }
 
 o.termguicolors = true
