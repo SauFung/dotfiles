@@ -43,6 +43,13 @@ local M = {
 
       lspconfig.lua_ls.setup({
         on_init = function(client)
+          if client.workspace_folders then
+            local path = client.workspace_folders[1].name
+            if vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc") then
+              return
+            end
+          end
+
           client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
             runtime = {
               version = "LuaJIT",
@@ -57,9 +64,12 @@ local M = {
             },
           })
         end,
+
         settings = {
           Lua = {},
         },
+
+        filetypes = { "lua" },
       })
 
       lspconfig.clangd.setup({})
@@ -82,11 +92,21 @@ local M = {
   {
     "stevearc/conform.nvim",
     event = "BufReadPre",
-    opts = {
-      formatters_by_ft = {
-        lua = { "stylua" },
-      },
-    },
+    config = function()
+      local config_path = vim.fn.stdpath("config")
+      local conform = require("conform")
+      conform.setup({
+        formatters_by_ft = {
+          lua = { "stylua" },
+        },
+      })
+
+      conform.formatters.stylua = {
+        prepend_args = {
+          "--config-path=" .. config_path .. "/stylua.toml",
+        },
+      }
+    end,
   },
 
   {

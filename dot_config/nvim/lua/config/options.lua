@@ -1,4 +1,4 @@
-if vim.fn.has("wsl") then
+if vim.fn.has("wsl") == 1 then
   vim.g.clipboard = {
     name = "win32yank-wsl",
     copy = {
@@ -14,6 +14,8 @@ if vim.fn.has("wsl") then
 end
 
 local o = vim.opt
+
+vim.g.have_nerd_font = true
 
 o.number = true
 o.relativenumber = true

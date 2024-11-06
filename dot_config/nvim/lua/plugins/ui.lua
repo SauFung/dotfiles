@@ -7,7 +7,13 @@ local M = {
       onedark.setup({
         style = "darker", -- dark/darker/cool/deep/warm/warmer
         term_colors = true,
+        code_style = {
+          keywords = "bold",
+          functions = "bold",
+          comments = "italic",
+        },
       })
+
       onedark.load()
     end,
   },
@@ -15,21 +21,83 @@ local M = {
   {
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    opts = {
-      options = {
-        icons_enabled = true,
-        theme = "material",
-        section_separators = { left = "", right = "" },
-        component_separators = { left = "", right = "" },
-        globlastatus = true,
-        disabled_filetypes = {
-          statusline = {
-            "dashboard",
-            "neo-tree",
+    config = function()
+      local lsp_name = function()
+        local clients = vim.lsp.get_clients()
+        local client_names = {}
+        if not next(clients) then
+          return "󱚢 " .. "No Active Lsp"
+        end
+
+        for _, client in ipairs(clients) do
+          if not client_names[client.name] then
+            table.insert(client_names, client.name)
+          end
+        end
+        return "󰚩 " .. client_names[1]
+      end
+
+      require("lualine").setup({
+        options = {
+          icons_enabled = true,
+          theme = "material",
+          section_separators = { left = "", right = "" },
+          component_separators = { left = "", right = "" },
+          globlastatus = true,
+          disabled_filetypes = {
+            statusline = {
+              "dashboard",
+              "neo-tree",
+            },
           },
         },
-      },
-    },
+
+        sections = {
+          lualine_a = {
+            {
+              "mode",
+              icons_enabled = true,
+              icon = { "", color = { gui = "NONE" } },
+              color = { gui = "bold" },
+            },
+          },
+          lualine_c = {
+            {
+              "filetype",
+              colored = true,
+              icon_only = true,
+              padding = { left = 1, right = 0 },
+              separator = { left = "", right = "" },
+            },
+            {
+              "filename",
+              separator = { left = "", right = "" },
+              padding = { left = 0, right = 0 },
+            },
+            {
+              "%=",
+            },
+            {
+              lsp_name,
+              color = { fg = "#61AFEF", gui = "NONE" },
+            },
+          },
+          lualine_x = {
+            {
+              "encoding",
+              fmt = string.upper,
+              padding = { left = 1, right = 0 },
+            },
+            {
+              "fileformat",
+              fmt = string.upper,
+              icons_enabled = false,
+              color = { fg = "#82AAFF", gui = "bold" },
+            },
+          },
+        },
+      })
+    end,
   },
 
   {
@@ -59,6 +127,7 @@ local M = {
 
   {
     "HiPhish/rainbow-delimiters.nvim",
+    submodules = false,
     config = function()
       require("rainbow-delimiters.setup").setup({
         highlight = {
@@ -107,18 +176,28 @@ local M = {
   {
     "nvimdev/dashboard-nvim",
     event = "VimEnter",
+    dependencies = {
+      { "nvim-tree/nvim-web-devicons" },
+      {
+        "folke/persistence.nvim",
+        event = "BufReadPre",
+        opts = {
+          dir = vim.fn.stdpath("state") .. "/sessions/",
+        },
+      },
+    },
     config = function()
       local logo = [[
- ▄▄▄▄▄▄▄ ▄▄▄     ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄    ▄▄   ▄▄ ▄▄▄ ▄▄   ▄▄ 
-█       █   █   █       █       █       █  █  █ █  █   █  █▄█  █
-█  ▄▄▄▄▄█   █   █    ▄▄▄█    ▄▄▄█    ▄  █  █  █▄█  █   █       █
-█ █▄▄▄▄▄█   █   █   █▄▄▄█   █▄▄▄█   █▄█ █  █       █   █       █
-█▄▄▄▄▄  █   █▄▄▄█    ▄▄▄█    ▄▄▄█    ▄▄▄█  █       █   █       █
- ▄▄▄▄▄█ █       █   █▄▄▄█   █▄▄▄█   █       █     ██   █ ██▄██ █
-█▄▄▄▄▄▄▄█▄▄▄▄▄▄▄█▄▄▄▄▄▄▄█▄▄▄▄▄▄▄█▄▄▄█        █▄▄▄█ █▄▄▄█▄█   █▄█
+       ▄▄▄▄▄▄▄ ▄▄▄     ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄    ▄▄   ▄▄ ▄▄▄ ▄▄   ▄▄ 
+      █       █   █   █       █       █       █  █  █ █  █   █  █▄█  █
+      █  ▄▄▄▄▄█   █   █    ▄▄▄█    ▄▄▄█    ▄  █  █  █▄█  █   █       █
+      █ █▄▄▄▄▄█   █   █   █▄▄▄█   █▄▄▄█   █▄█ █  █       █   █       █
+      █▄▄▄▄▄  █   █▄▄▄█    ▄▄▄█    ▄▄▄█    ▄▄▄█  █       █   █       █
+       ▄▄▄▄▄█ █       █   █▄▄▄█   █▄▄▄█   █       █     ██   █ ██▄██ █
+      █▄▄▄▄▄▄▄█▄▄▄▄▄▄▄█▄▄▄▄▄▄▄█▄▄▄▄▄▄▄█▄▄▄█        █▄▄▄█ █▄▄▄█▄█   █▄█
       ]]
 
-      logo = string.rep("\n", 15) .. logo .. "\n\n"
+      logo = string.rep("\n", 12) .. logo .. "\n\n"
 
       local conf = vim.fn.stdpath("config")
 
@@ -152,7 +231,7 @@ local M = {
         },
 
         {
-          action = "lua require('persistence').load()",
+          action = "lua require('persistence').load({last = true})",
           desc = " Restore Session",
           icon = " ",
           key = "s",
@@ -198,7 +277,6 @@ local M = {
         },
       })
     end,
-    dependencies = { { "nvim-tree/nvim-web-devicons" } },
   },
 
   {
